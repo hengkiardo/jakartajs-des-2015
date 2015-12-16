@@ -1,29 +1,27 @@
 "use strict";
 
-global.config = require('./config')
-
 var fs       = require('fs')
-var express  = require('express')
-var Agenda   = require('agenda')
-var agendaUI = require('agenda-ui')
-var moment   = require('moment')
-var timing   = require('./helpers/timing')
+var Request   = require('request')
+var async     = require('async')
+var _         = require('lodash')
 
-require('./config/mongodb')(config)
-
-
-fs.readdirSync(__dirname + '/models' ).forEach(function (file) {
-
-  if (~file.indexOf('.js')) require(__dirname + '/models'  + '/' + file)
-
+async.waterfall([
+  requestPage
+], function (err, result) {
+  if (err) console.log(err)
+  // console.log(result)
 })
 
-var agenda = new Agenda({ db : { address: config.mongodb, collection: "cron"}})
+function requestPage(callback) {
+  var options = {
+    url: 'http://www.lazada.co.id/beli-handphone-tablet/',
+    headers: {
+      'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.125 Safari/537.36',
+    }
+  };
 
-var Lazada      = require('./task/lazada')
-
-agenda.purge(function (err, numRemoved) {
-  Lazada(agenda)
-})
-
-agenda.start()
+  Request(options, function (err, response, body) {
+    console.log(err, _.result(response, 'statusCode'))
+    callback(null, body)
+  })
+}
