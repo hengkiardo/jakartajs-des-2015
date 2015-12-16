@@ -5,6 +5,7 @@ var mongoose = require('mongoose')
 var Product = new mongoose.Schema({
     name : {
       type: String,
+      index: true,
       require: true
     },
     photo: {
@@ -13,7 +14,8 @@ var Product = new mongoose.Schema({
     },
     product_link: {
       type: String,
-      require: true
+      require: true,
+      unique: true,
     },
     price_normal : {
       type: String,
