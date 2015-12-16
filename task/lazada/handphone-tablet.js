@@ -16,8 +16,9 @@ module.exports = function(done, job) {
       console.log(err)
     }
 
-    done()
+    console.log('done!')
 
+    done()
   })
 
   function requestPage(callback) {
@@ -31,7 +32,9 @@ module.exports = function(done, job) {
 
     Request(options, function (err, response, body) {
 
-      console.log(err, _.result(response, 'statusCode'))
+      if (err) {
+        console.log(err, _.result(response, 'statusCode'))
+      }
 
       callback(null, body)
     })
@@ -69,8 +72,11 @@ module.exports = function(done, job) {
       var NewProduct = new ProductModel(singleProduct)
 
       NewProduct.save(function (err, newJob) {
-        if (err) console.log(err)
-        productCards.push(singleProduct)
+        if (err) {
+          // console.log(err)
+        } else {
+          productCards.push(singleProduct)
+        }
         cb()
       })
     };
