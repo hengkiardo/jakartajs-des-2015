@@ -15,12 +15,15 @@
     "agenda": "^0.6.28",
     "agenda-ui": "0.0.7",
     "async": "^1.4.2",
+    "body-parser": "^1.14.1",
     "cheerio": "^0.19.0",
     "express": "^4.13.3",
+    "lodash": "^3.10.1",
+    "method-override": "^2.3.5",
     "moment": "2.10.6",
     "mongoose": "^4.1.11",
     "mongoose-timestamp": "^0.4.0",
-    "request": "^2.65.0",
-    "lodash": "^3.10.1"
+    "morgan": "^1.6.1",
+    "request": "^2.65.0"
   }
 }
