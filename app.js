@@ -4,13 +4,10 @@ global.config = require('./config')
 
 var fs       = require('fs')
 var express  = require('express')
-var Agenda   = require('agenda')
-var agendaUI = require('agenda-ui')
 var moment   = require('moment')
-var timing   = require('./helpers/timing')
+var mongoose  = require('mongoose')
 
 require('./config/mongodb')(config)
-
 
 fs.readdirSync(__dirname + '/models' ).forEach(function (file) {
 
@@ -18,12 +15,84 @@ fs.readdirSync(__dirname + '/models' ).forEach(function (file) {
 
 })
 
-var agenda = new Agenda({ db : { address: config.mongodb, collection: "cron"}})
+var ProductModel  = mongoose.model('Product')
+var Request   = require('request')
+var async     = require('async')
+var _         = require('lodash')
+var moment    = require('moment')
+var cheerio   = require('cheerio')
 
-var Lazada      = require('./task/lazada')
+async.waterfall([
+  requestPage,
+  cheerioScrape
+], function (err, result) {
 
-agenda.purge(function (err, numRemoved) {
-  Lazada(agenda)
+  if (err) {
+    console.log(err)
+  }
+  console.log('done!')
 })
 
-agenda.start()
+function requestPage(callback) {
+
+  var options = {
+    url: 'http://www.lazada.co.id/beli-handphone-tablet/',
+    headers: {
+      'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.125 Safari/537.36',
+    }
+  };
+
+  Request(options, function (err, response, body) {
+
+    console.log(err, _.result(response, 'statusCode'))
+
+    callback(null, body)
+  })
+}
+
+function cheerioScrape(html, callback) {
+
+  var $ = cheerio.load(html)
+
+  var productCards = []
+
+  var insertJobToDB = function(card, cb) {
+
+    var singleProduct = {
+      name : $(card).find('.product-card__name-wrap span').attr('title'),
+
+      photo : $(card).find('.product-card__img img').attr('data-original'),
+
+      product_link : $(card).find('> a').attr('href'),
+
+      price_normal : $(card).find('.old-price-wrap .product-card__old-price').text(),
+
+      price_discount : $(card).find('.old-price-wrap .product-card__sale').text(),
+
+      sale_number : $(card).find('.product-card__price').text(),
+
+      isCredit : $(card).hasClass('IP'),
+
+      rating : {
+        number : $(card).find('.rating__number').text(),
+        star : $(card).find('.icon-rating_stars_disabled').attr('title')
+      }
+    }
+
+    var NewProduct = new ProductModel(singleProduct)
+
+    NewProduct.save(function (err, newJob) {
+
+      if (err) {
+        // console.log(err)
+      }
+
+      productCards.push(singleProduct)
+      cb()
+    })
+  };
+
+  async.each( $('.component-product_list .product-card') , insertJobToDB, function (err) {
+    callback(null, productCards)
+  })
+}
