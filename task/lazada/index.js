@@ -3,11 +3,14 @@ function define(agenda) {
 
   agenda.define('lazada.co.id - handphone tablet', function (job, done) {
 
-    require('./handphone-tablet.js')(done, job)
+    for (var i = 0; i <= 3; i++) {
 
+      require('./handphone-tablet.js')(done, job, i)
+
+    }
   })
 
-  agenda.every('1 minutes', 'lazada.co.id - handphone tablet');
+  agenda.every('1 seconds', 'lazada.co.id - handphone tablet');
 }
 
 

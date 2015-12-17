@@ -6,7 +6,7 @@ var ProductModel  = mongoose.model('Product')
 var moment    = require('moment')
 var cheerio   = require('cheerio')
 
-module.exports = function(done, job) {
+module.exports = function(done, job, page) {
   async.waterfall([
     requestPage,
     cheerioScrape
@@ -16,15 +16,21 @@ module.exports = function(done, job) {
       console.log(err)
     }
 
-    console.log('done!')
+    console.log(page)
 
-    done()
+    if (page == 3) {
+
+      console.log('done!')
+
+      done()
+    }
+
   })
 
   function requestPage(callback) {
 
     var options = {
-      url: 'http://www.lazada.co.id/beli-handphone-tablet/',
+      url: 'http://www.lazada.co.id/beli-handphone-tablet?page=' + page,
       headers: {
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.125 Safari/537.36',
       }
